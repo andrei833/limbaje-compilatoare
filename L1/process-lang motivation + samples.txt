@@ -1,0 +1,70 @@
+System and process management
+    Language Purpose: Allows administrations to script sequences of actions regarding porcesses (systemd like), and handle batch operations on system services with simple syntax.
+
+Datatypes:
+    process - background service, It has a state (ex. RUNNING, STOPPPED, ...) and tracks what other proceses it requires to function
+    state - an enumeration representing a process's status, returned by status(process)
+    group - iterable array/list of independent processes, used to bundle services.
+
+Statements:
+    The process declaration statement `process` supports dependencies, this allows for a modular bottom up architecture. If `A` depends on `B` , stopping `B` will also stop `A`.
+
+    The group assignment statement allows for itterative execution of repetitive operation on like wise processes. Group is a list of processes
+
+    Command statemnt act as the input/output operations of the DSL. They issue immediate state changes to the operating system's service manager.
+
+    I/O operations are done with the help of `status()` and the commands that send actions to the service manager.
+
+    Conditional statements, used for safe checks on services.
+
+    Allows execution of commands across every process inside a user-defined `group`
+
+Samples:
+
+1. Error Lockdown
+process net;
+process db { depends_on: net };
+process api { depends_on: db };
+process web { depends_on: api };
+
+group core = [db, api];
+
+for (node in core) {
+
+    if (status(node) == ERROR) {
+        disable(web);
+        stop(web);
+
+        stop(node);
+        disable(node);
+
+    }
+}
+
+2. Safe System Boot
+process net;
+process db { depends_on: net};
+process cache { depends_on: net};
+process api { depends_on: db, cache};
+
+group data_tier = [db, cache];
+
+
+if (status(net) == STOPPED) {
+    enable(net);
+    start(net);
+}
+
+for (data_node in data_tier) {
+
+    if (status(data_node) == DISABLED) {
+        enable(data_node);
+    }
+
+    start(data_node);
+}
+
+if (status(db) == RUNNING) {
+    enable(api);
+    start(api);
+}

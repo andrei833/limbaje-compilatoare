@@ -3,10 +3,10 @@
 
 <statement> ::= <proecess_dec> | <command> | <conditional> | <group_dec> | <loop>
 
-<process_decl> ::= "process" <identifier> <process_body> ";"
+<process_dec> ::= "process" <identifier> <process_body> ";"
 <process_body> ::= "{" "depends_on:" <identifier_list> "}" | epsilon
 
-<group_decl> ::= "group" <identifier> "=" "[" <identifier_list> "]" ";"
+<group_dec> ::= "group" <identifier> "=" "[" <identifier_list> "]" ";"
 
 <identifier_list> ::= <identifier> | <identifier> "," <identifier_list>
 
@@ -22,7 +22,7 @@
 <state> ::= "RUNNING" | "STOPPED" | "ENABLED" | "DISABLED" | "ERROR"
 
 <identifier> ::= <letter> <val_chars>
-<val_chars> ::= <letter> <id_chars> | <digit> <id_chars> | "_" <id_chars> | epsilon
+<val_chars> ::= <letter> <val_chars> | <digit> <val_chars> | "_" <val_chars> | epsilon
 
 <letter> ::= "a" | "b" | ... | "z" | "A" | "B" | ... | "Z"
 <digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
