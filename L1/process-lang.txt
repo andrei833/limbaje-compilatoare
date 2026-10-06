@@ -7,7 +7,7 @@ Datatypes:
     group - itreable array/list of independent processes, used to bundle services.
 
 Statements:
-    The process declaration statement `processi supports dependencies, this allows for a modular bottom up architecture. If `A` depends on `B` , stopping `B` will also stop `A`.
+    The process declaration statement `process` supports dependencies, this allows for a modular bottom up architecture. If `A` depends on `B` , stopping `B` will also stop `A`.
 
     The group assignment statement allows for itterative execution of
     repetitive operation on like wise processes.
