@@ -2,22 +2,36 @@ System and process management
     Language Purpose: Allows administrations to script sequences of actions regarding porcesses (systemd like), and handle batch operations on system services with simple syntax.
 
 Datatypes:
-    process - background service, It has a state (ex. RUNNING, STOPPPED, ...) and tracks what other proceses it requires to function
-    state - an enumeration representing a process's status, returned by status(process)
+    process - background service with an execution state (RUNNING, STOPPED, ERROR), an independent automatic startup setting, and dependencies on other processes
+        `process db { depends_on: net };`
+    state - an enumeration representing a process's execution status (RUNNING, STOPPED, ERROR), returned by status(process)
+        `if (status(db) == RUNNING) { start(api); }`
+    boolean - true or false, returned by autostart(process) to indicate whether automatic startup is enabled
+        `if (autostart(net) == false) { enable(net); }`
     group - iterable array/list of independent processes, used to bundle services.
+        `group data_tier = [db, cache];`
 
 Statements:
     The process declaration statement `process` supports dependencies, this allows for a modular bottom up architecture. If `A` depends on `B` , stopping `B` will also stop `A`.
+        `process db { depends_on: net };`
 
     The group assignment statement allows for itterative execution of repetitive operation on like wise processes. Group is a list of processes
+        `group core = [db, api];`
 
-    Command statemnt act as the input/output operations of the DSL. They issue immediate state changes to the operating system's service manager.
+    Command statements act as the output operations of the DSL. start/stop change execution status; enable/disable change automatic startup without starting or stopping the process.
+        `start(net);`
 
-    I/O operations are done with the help of `status()` and the commands that send actions to the service manager.
+    I/O operations are done with the help of `status()`, `autostart()`, and the commands that send actions to the service manager.
+        `if (status(net) == STOPPED) { start(net); }`
 
     Conditional statements, used for safe checks on services.
+        `if (status(net) == STOPPED) { enable(net); start(net); }`
+
+    Loops allow iterating over groups (lists of identifiers).
+        `for (data_node in data_tier) { start(data_node); }`
 
     Allows execution of commands across every process inside a user-defined `group`
+        `for (node in core) { stop(node); }`
 
 Samples:
 
@@ -57,7 +71,7 @@ if (status(net) == STOPPED) {
 
 for (data_node in data_tier) {
 
-    if (status(data_node) == DISABLED) {
+    if (autostart(data_node) == false) {
         enable(data_node);
     }
 

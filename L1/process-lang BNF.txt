@@ -1,28 +1,35 @@
+Syntax:
+
 <program> ::= <statements>
 <statements> ::= <statement> | <statement><statements>
-
 <statement> ::= <proecess_dec> | <command> | <conditional> | <group_dec> | <loop>
 
-<process_dec> ::= "process" <identifier> <process_body> ";"
-<process_body> ::= "{" "depends_on:" <identifier_list> "}" | epsilon
-
-<group_dec> ::= "group" <identifier> "=" "[" <identifier_list> "]" ";"
-
-<identifier_list> ::= <identifier> | <identifier> "," <identifier_list>
-
-<command> ::= <action> "(" <identifier> ")" ";"
-<action> ::= "start" | "stop" | "enable" | "disable"
-
-<conditional> ::= "if" "(" <condition> ")" "{" <statements> "}" <else_clause>
-<else_clause> ::= "else" "{" <statements> "}" | epsilon
-
-<loop> ::= "for" "(" <identifier> "in" <identifier> ")" "{" <statements> "}"
-
-<condition> ::= "status" "(" <identifier> ")" "==" <state>
-<state> ::= "RUNNING" | "STOPPED" | "ENABLED" | "DISABLED" | "ERROR"
+Identifiers:
 
 <identifier> ::= <letter> <val_chars>
 <val_chars> ::= <letter> <val_chars> | <digit> <val_chars> | "_" <val_chars> | epsilon
+
+Datatypes:
+
+<process_body> ::= "{" "depends_on:" <identifier_list> "}"
+                | epsilon
+<state> ::= "RUNNING" | "STOPPED" | "ERROR"
+<boolean> ::= "true" | "false"
+<identifier_list> ::= <identifier> | <identifier> "," <identifier_list>
+
+Statements:
+
+<process_dec> ::= "process" <identifier> <process_body> ";"
+<group_dec> ::= "group" <identifier> "=" "[" <identifier_list> "]" ";"
+<command> ::= <action> "(" <identifier> ")" ";"
+<action> ::= "start" | "stop" | "enable" | "disable"
+<conditional> ::= "if" "(" <condition> ")" "{" <statements> "}" <else_clause>
+<else_clause> ::= "else" "{" <statements> "}" | epsilon
+<loop> ::= "for" "(" <identifier> "in" <identifier> ")" "{" <statements> "}"
+<condition> ::= "status" "(" <identifier> ")" "==" <state>
+              | "autostart" "(" <identifier> ")" "==" <boolean>
+
+Terminals:
 
 <letter> ::= "a" | "b" | ... | "z" | "A" | "B" | ... | "Z"
 <digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
