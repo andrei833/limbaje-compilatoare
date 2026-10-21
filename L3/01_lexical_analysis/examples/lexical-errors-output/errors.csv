@@ -1,0 +1,4 @@
+Source Index,Value,Message
+8,12abc,Invalid lexical token
+23,_bad,Invalid lexical token
+40,@,Invalid lexical token

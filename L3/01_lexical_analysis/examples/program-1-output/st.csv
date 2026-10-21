@@ -1,0 +1,10 @@
+Index,Value / Lexeme,Type
+0,net,Identifier
+1,db,Identifier
+2,api,Identifier
+3,core,Identifier
+4,false,Constant (Boolean)
+5,STOPPED,Constant (State)
+6,node,Identifier
+7,ERROR,Constant (State)
+8,RUNNING,Constant (State)

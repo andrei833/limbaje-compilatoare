@@ -1,0 +1,5 @@
+Index,Value / Lexeme,Type
+0,net,Identifier
+1,core,Identifier
+2,node,Identifier
+3,ERROR,Constant (State)
