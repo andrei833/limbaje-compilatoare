@@ -17,9 +17,10 @@ def load_library():
     ffi.cdef("""
         typedef ... SymbolTable;
         SymbolTable *st_create(void);
-        int st_insert(SymbolTable *table, const char *value);
+        int st_insert(SymbolTable *table, const char *value, int type);
         int st_lookup(const SymbolTable *table, const char *value);
         int st_size(const SymbolTable *table);
+        int st_type(const SymbolTable *table, int id);
         const char *st_value(const SymbolTable *table, int id);
         void st_destroy(SymbolTable *table);
     """)
@@ -37,8 +38,8 @@ class SymbolTable:
         if self.ptr == self.ffi.NULL:
             raise MemoryError("Cannot create symbol table")
 
-    def insert(self, value):
-        symbol_id = self.lib.st_insert(self.ptr, value.encode("ascii"))
+    def insert(self, value, symbol_type):
+        symbol_id = self.lib.st_insert(self.ptr, value.encode("ascii"), symbol_type)
         if symbol_id < 0:
             raise MemoryError("Cannot insert symbol")
         return symbol_id
@@ -46,8 +47,11 @@ class SymbolTable:
     def rows(self):
         return [
             {
-                "id": index,
-                "lexeme": self.ffi.string(self.lib.st_value(self.ptr, index)).decode(
+                "index": index,
+                "type": ("Identifier", "Constant (Boolean)", "Constant (State)")[
+                    self.lib.st_type(self.ptr, index)
+                ],
+                "value": self.ffi.string(self.lib.st_value(self.ptr, index)).decode(
                     "ascii"
                 ),
             }

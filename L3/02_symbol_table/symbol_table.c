@@ -7,6 +7,7 @@
 typedef struct Entry {
   char *value;
   int id;
+  int type; /* 0: identifier, 1: Boolean constant, 2: state constant */
   struct Entry *next;
 } Entry;
 
@@ -34,7 +35,7 @@ int st_lookup(const SymbolTable *table, const char *value) {
 }
 
 /* Return the existing/new stable ID, or -1 on allocation failure. */
-int st_insert(SymbolTable *table, const char *value) {
+int st_insert(SymbolTable *table, const char *value, int type) {
   int existing = st_lookup(table, value);
   if (existing >= 0)
     return existing;
@@ -48,6 +49,7 @@ int st_insert(SymbolTable *table, const char *value) {
   }
   strcpy(e->value, value);
   unsigned bucket = hash(value);
+  e->type = type;
   e->id = table->size++;
   e->next = table->buckets[bucket];
   table->buckets[bucket] = e;
@@ -62,6 +64,14 @@ const char *st_value(const SymbolTable *table, int id) {
       if (e->id == id)
         return e->value;
   return NULL;
+}
+
+int st_type(const SymbolTable *table, int id) {
+  for (unsigned b = 0; b < BUCKETS; ++b)
+    for (Entry *e = table->buckets[b]; e; e = e->next)
+      if (e->id == id)
+        return e->type;
+  return -1;
 }
 
 void st_destroy(SymbolTable *table) {

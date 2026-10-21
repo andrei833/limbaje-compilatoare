@@ -1,6 +1,6 @@
 """Regex lexer for the Lab 2 process-management programs."""
 
-import json
+import csv
 import re
 import sys
 from pathlib import Path
@@ -12,7 +12,6 @@ ROOT = Path(__file__).resolve().parent.parent
 
 CONSTANTS = re.compile(r"(?:RUNNING|STOPPED|ERROR|true|false)\Z")
 IDENTIFIER = re.compile(r"[A-Za-z][A-Za-z0-9_]*\Z")
-# Consume digit/underscore-led words together so 12abc is one error.
 WORD = r"[A-Za-z0-9_]+"
 
 
@@ -50,19 +49,13 @@ def build_scanner(tokens):
 def classify_token(lexeme, tokens, table):
     """Return (token code, symbol ID), or None for an invalid lexeme."""
     if CONSTANTS.fullmatch(lexeme):
-        return tokens["CONSTANT"], table.insert(lexeme)
+        symbol_type = 1 if lexeme in ("true", "false") else 2
+        return tokens["CONSTANT"], table.insert(lexeme, symbol_type)
     if lexeme in tokens and lexeme not in ("IDENTIFIER", "CONSTANT"):
         return tokens[lexeme], -1
     if IDENTIFIER.fullmatch(lexeme):
-        return tokens["IDENTIFIER"], table.insert(lexeme)
+        return tokens["IDENTIFIER"], table.insert(lexeme, 0)
     return None
-
-
-def advance_position(lexeme, line, column):
-    """Move the one-based cursor past a matched token or whitespace."""
-    if "\n" in lexeme:
-        return line + lexeme.count("\n"), len(lexeme.rsplit("\n", 1)[1]) + 1
-    return line, column + len(lexeme)
 
 
 def analyze(source, tokens):
@@ -70,7 +63,6 @@ def analyze(source, tokens):
     scanner = build_scanner(tokens)
     pif = []
     errors = []
-    line, column = 1, 1
 
     with SymbolTable() as table:
         for match in scanner.finditer(source):
@@ -80,8 +72,7 @@ def analyze(source, tokens):
                 if classification is None:
                     errors.append(
                         {
-                            "line": line,
-                            "column": column,
+                            "source_index": match.start(),
                             "lexeme": lexeme,
                             "message": "Invalid lexical token",
                         }
@@ -90,24 +81,66 @@ def analyze(source, tokens):
                     token_code, symbol_id = classification
                     pif.append(
                         {
+                            "position": len(pif),
                             "token": token_code,
                             "st": symbol_id,
                             "lexeme": lexeme,
-                            "line": line,
-                            "column": column,
                         }
                     )
-            line, column = advance_position(lexeme, line, column)
 
         return {"pif": pif, "st": table.rows(), "errors": errors}
 
 
+def write_csv(path, headers, rows):
+    with path.open("w", newline="", encoding="utf-8") as output:
+        writer = csv.writer(output)
+        writer.writerow(headers)
+        writer.writerows(rows)
+
+
+def save_tables(result, directory):
+    directory.mkdir(parents=True, exist_ok=True)
+    symbols = result["st"]
+    write_csv(
+        directory / "st.csv",
+        ["Index", "Value / Lexeme", "Type"],
+        [(s["index"], s["value"], s["type"]) for s in symbols],
+    )
+
+    rows = []
+    for entry in result["pif"]:
+        symbol_id = entry["st"]
+        if symbol_id != -1:
+            symbol = symbols[symbol_id]
+            category = "id" if symbol["type"] == "Identifier" else "const"
+            value, kind = symbol["value"], symbol["type"]
+        else:
+            category = value = entry["lexeme"]
+            if value in ("=", "=="):
+                kind = "Operator"
+            elif IDENTIFIER.fullmatch(value):
+                kind = "Keyword"
+            else:
+                kind = "Separator"
+        rows.append((entry["position"], category, symbol_id, value, kind))
+    write_csv(
+        directory / "pif.csv",
+        ["Position", "Token / Category", "ST Index", "Value", "Type"],
+        rows,
+    )
+    write_csv(
+        directory / "errors.csv",
+        ["Source Index", "Value", "Message"],
+        [(e["source_index"], e["lexeme"], e["message"]) for e in result["errors"]],
+    )
+
+
 def main():
-    """Read source text from stdin and write the analysis as JSON to stdout."""
+    directory = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("output")
     tokens = load_tokens(ROOT / "01_lexical_analysis/tokens.txt")
     result = analyze(sys.stdin.read(), tokens)
-    json.dump(result, sys.stdout, indent=2)
-    print()
+    save_tables(result, directory)
+    print(f"Saved st.csv, pif.csv, errors.csv in {directory}")
     return 1 if result["errors"] else 0
 
 
