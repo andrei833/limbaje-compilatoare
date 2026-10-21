@@ -1,0 +1,387 @@
+{
+  "pif": [
+    {
+      "token": 2,
+      "st": -1,
+      "lexeme": "process",
+      "line": 1,
+      "column": 1
+    },
+    {
+      "token": 0,
+      "st": 0,
+      "lexeme": "net",
+      "line": 1,
+      "column": 9
+    },
+    {
+      "token": 25,
+      "st": -1,
+      "lexeme": ";",
+      "line": 1,
+      "column": 12
+    },
+    {
+      "token": 4,
+      "st": -1,
+      "lexeme": "group",
+      "line": 2,
+      "column": 1
+    },
+    {
+      "token": 0,
+      "st": 1,
+      "lexeme": "core",
+      "line": 2,
+      "column": 7
+    },
+    {
+      "token": 16,
+      "st": -1,
+      "lexeme": "=",
+      "line": 2,
+      "column": 12
+    },
+    {
+      "token": 21,
+      "st": -1,
+      "lexeme": "[",
+      "line": 2,
+      "column": 14
+    },
+    {
+      "token": 0,
+      "st": 0,
+      "lexeme": "net",
+      "line": 2,
+      "column": 15
+    },
+    {
+      "token": 22,
+      "st": -1,
+      "lexeme": "]",
+      "line": 2,
+      "column": 18
+    },
+    {
+      "token": 25,
+      "st": -1,
+      "lexeme": ";",
+      "line": 2,
+      "column": 19
+    },
+    {
+      "token": 11,
+      "st": -1,
+      "lexeme": "for",
+      "line": 4,
+      "column": 1
+    },
+    {
+      "token": 17,
+      "st": -1,
+      "lexeme": "(",
+      "line": 4,
+      "column": 5
+    },
+    {
+      "token": 0,
+      "st": 2,
+      "lexeme": "node",
+      "line": 4,
+      "column": 6
+    },
+    {
+      "token": 12,
+      "st": -1,
+      "lexeme": "in",
+      "line": 4,
+      "column": 11
+    },
+    {
+      "token": 0,
+      "st": 1,
+      "lexeme": "core",
+      "line": 4,
+      "column": 14
+    },
+    {
+      "token": 18,
+      "st": -1,
+      "lexeme": ")",
+      "line": 4,
+      "column": 18
+    },
+    {
+      "token": 19,
+      "st": -1,
+      "lexeme": "{",
+      "line": 4,
+      "column": 20
+    },
+    {
+      "token": 9,
+      "st": -1,
+      "lexeme": "if",
+      "line": 5,
+      "column": 5
+    },
+    {
+      "token": 17,
+      "st": -1,
+      "lexeme": "(",
+      "line": 5,
+      "column": 8
+    },
+    {
+      "token": 13,
+      "st": -1,
+      "lexeme": "status",
+      "line": 5,
+      "column": 9
+    },
+    {
+      "token": 17,
+      "st": -1,
+      "lexeme": "(",
+      "line": 5,
+      "column": 15
+    },
+    {
+      "token": 0,
+      "st": 2,
+      "lexeme": "node",
+      "line": 5,
+      "column": 16
+    },
+    {
+      "token": 18,
+      "st": -1,
+      "lexeme": ")",
+      "line": 5,
+      "column": 20
+    },
+    {
+      "token": 15,
+      "st": -1,
+      "lexeme": "==",
+      "line": 5,
+      "column": 22
+    },
+    {
+      "token": 1,
+      "st": 3,
+      "lexeme": "ERROR",
+      "line": 5,
+      "column": 25
+    },
+    {
+      "token": 18,
+      "st": -1,
+      "lexeme": ")",
+      "line": 5,
+      "column": 30
+    },
+    {
+      "token": 19,
+      "st": -1,
+      "lexeme": "{",
+      "line": 5,
+      "column": 32
+    },
+    {
+      "token": 8,
+      "st": -1,
+      "lexeme": "disable",
+      "line": 6,
+      "column": 9
+    },
+    {
+      "token": 17,
+      "st": -1,
+      "lexeme": "(",
+      "line": 6,
+      "column": 16
+    },
+    {
+      "token": 0,
+      "st": 2,
+      "lexeme": "node",
+      "line": 6,
+      "column": 17
+    },
+    {
+      "token": 18,
+      "st": -1,
+      "lexeme": ")",
+      "line": 6,
+      "column": 21
+    },
+    {
+      "token": 25,
+      "st": -1,
+      "lexeme": ";",
+      "line": 6,
+      "column": 22
+    },
+    {
+      "token": 6,
+      "st": -1,
+      "lexeme": "stop",
+      "line": 7,
+      "column": 9
+    },
+    {
+      "token": 17,
+      "st": -1,
+      "lexeme": "(",
+      "line": 7,
+      "column": 13
+    },
+    {
+      "token": 0,
+      "st": 2,
+      "lexeme": "node",
+      "line": 7,
+      "column": 14
+    },
+    {
+      "token": 18,
+      "st": -1,
+      "lexeme": ")",
+      "line": 7,
+      "column": 18
+    },
+    {
+      "token": 25,
+      "st": -1,
+      "lexeme": ";",
+      "line": 7,
+      "column": 19
+    },
+    {
+      "token": 20,
+      "st": -1,
+      "lexeme": "}",
+      "line": 8,
+      "column": 5
+    },
+    {
+      "token": 10,
+      "st": -1,
+      "lexeme": "else",
+      "line": 8,
+      "column": 7
+    },
+    {
+      "token": 19,
+      "st": -1,
+      "lexeme": "{",
+      "line": 8,
+      "column": 12
+    },
+    {
+      "token": 7,
+      "st": -1,
+      "lexeme": "enable",
+      "line": 9,
+      "column": 9
+    },
+    {
+      "token": 17,
+      "st": -1,
+      "lexeme": "(",
+      "line": 9,
+      "column": 15
+    },
+    {
+      "token": 0,
+      "st": 2,
+      "lexeme": "node",
+      "line": 9,
+      "column": 16
+    },
+    {
+      "token": 18,
+      "st": -1,
+      "lexeme": ")",
+      "line": 9,
+      "column": 20
+    },
+    {
+      "token": 25,
+      "st": -1,
+      "lexeme": ";",
+      "line": 9,
+      "column": 21
+    },
+    {
+      "token": 5,
+      "st": -1,
+      "lexeme": "start",
+      "line": 10,
+      "column": 9
+    },
+    {
+      "token": 17,
+      "st": -1,
+      "lexeme": "(",
+      "line": 10,
+      "column": 14
+    },
+    {
+      "token": 0,
+      "st": 2,
+      "lexeme": "node",
+      "line": 10,
+      "column": 15
+    },
+    {
+      "token": 18,
+      "st": -1,
+      "lexeme": ")",
+      "line": 10,
+      "column": 19
+    },
+    {
+      "token": 25,
+      "st": -1,
+      "lexeme": ";",
+      "line": 10,
+      "column": 20
+    },
+    {
+      "token": 20,
+      "st": -1,
+      "lexeme": "}",
+      "line": 11,
+      "column": 5
+    },
+    {
+      "token": 20,
+      "st": -1,
+      "lexeme": "}",
+      "line": 12,
+      "column": 1
+    }
+  ],
+  "st": [
+    {
+      "id": 0,
+      "lexeme": "net"
+    },
+    {
+      "id": 1,
+      "lexeme": "core"
+    },
+    {
+      "id": 2,
+      "lexeme": "node"
+    },
+    {
+      "id": 3,
+      "lexeme": "ERROR"
+    }
+  ],
+  "errors": []
+}
