@@ -1,0 +1,25 @@
+Lab 3 documentation
+
+As required for the lab, the program performs lexical analysis and uses
+a symbol table implemented in C. I used Python and regular expressions
+for token detection. CFFI connects Python to C, and uv manages the Python
+environment. The results are saved as CSV tables.
+
+The lexer scans the input from left to right and ignores whitespace.
+Identifiers start with a letter, followed by letters, digits or underscores.
+The constants are RUNNING, STOPPED, ERROR, true and false. Keywords and
+symbols are recognized using tokens.txt. Whole words are checked together,
+so 12abc is reported as one error. Invalid characters are also reported,
+and scanning continues after an error.
+
+The symbol table stores each identifier or constant only once. It uses
+an array of 101 buckets, each containing a linked list. The hash adds the
+character codes and takes the result modulo 101. When symbols collide,
+they stay in the same bucket but have different positions in its list.
+Their reference is the pair (bucket, index in bucket).
+
+The table supports insertion, lookup and retrieval, and its memory is
+freed after analysis. Repeated symbols reuse their existing reference.
+The PIF keeps tokens in source order and refers to the ST for identifiers
+and constants. Fixed tokens use (-1, -1). Lexical errors include the invalid
+text and its character index in the input.

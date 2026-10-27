@@ -19,9 +19,11 @@ def load_library():
         SymbolTable *st_create(void);
         int st_insert(SymbolTable *table, const char *value, int type);
         int st_lookup(const SymbolTable *table, const char *value);
+        int st_position(const SymbolTable *table, const char *value);
         int st_size(const SymbolTable *table);
-        int st_type(const SymbolTable *table, int id);
-        const char *st_value(const SymbolTable *table, int id);
+        int st_type(const SymbolTable *table, int row);
+        int st_bucket(const SymbolTable *table, int row);
+        const char *st_value(const SymbolTable *table, int row);
         void st_destroy(SymbolTable *table);
     """)
     cache = Path(gettempdir()) / f"lab3-cffi-{getuid()}"
@@ -42,13 +44,16 @@ class SymbolTable:
         symbol_id = self.lib.st_insert(self.ptr, value.encode("ascii"), symbol_type)
         if symbol_id < 0:
             raise MemoryError("Cannot insert symbol")
-        return symbol_id
+        return symbol_id, self.lib.st_position(self.ptr, value.encode("ascii"))
 
     def rows(self):
         return [
             {
-                "index": index,
-                "type": ("Identifier", "Constant (Boolean)", "Constant (State)")[
+                "index": self.lib.st_bucket(self.ptr, index),
+                "bucket_position": self.lib.st_position(
+                    self.ptr, self.lib.st_value(self.ptr, index)
+                ),
+                "type": ("Identifier", "Constant", "Constant")[
                     self.lib.st_type(self.ptr, index)
                 ],
                 "value": self.ffi.string(self.lib.st_value(self.ptr, index)).decode(

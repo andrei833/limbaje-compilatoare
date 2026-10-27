@@ -1,5 +1,5 @@
-Index,Value / Lexeme,Type
-0,net,Identifier
-1,core,Identifier
-2,node,Identifier
-3,ERROR,Constant (State)
+"Index (bucket, index)",Value / Lexeme,Type
+"(24, 0)",net,Identifier
+"(21, 0)",core,Identifier
+"(18, 0)",node,Identifier
+"(91, 0)",ERROR,Constant

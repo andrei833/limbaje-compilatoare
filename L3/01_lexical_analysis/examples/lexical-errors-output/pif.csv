@@ -1,10 +1,10 @@
-Position,Token / Category,ST Index,Value,Type
-0,process,-1,process,Keyword
-1,;,-1,;,Separator
-2,process,-1,process,Keyword
-3,;,-1,;,Separator
-4,start,-1,start,Keyword
-5,(,-1,(,Separator
-6,id,0,net,Identifier
-7,),-1,),Separator
-8,;,-1,;,Separator
+"ST Index (bucket, index)",Token / Category,Value
+"(-1, -1)",process,process
+"(-1, -1)",;,;
+"(-1, -1)",process,process
+"(-1, -1)",;,;
+"(-1, -1)",start,start
+"(-1, -1)",(,(
+"(24, 0)",IDENTIFIER,net
+"(-1, -1)",),)
+"(-1, -1)",;,;

@@ -47,12 +47,12 @@ def build_scanner(tokens):
 
 
 def classify_token(lexeme, tokens, table):
-    """Return (token code, symbol ID), or None for an invalid lexeme."""
+    """Return (token code, (bucket index, position in bucket)), or None for an invalid lexeme."""
     if CONSTANTS.fullmatch(lexeme):
         symbol_type = 1 if lexeme in ("true", "false") else 2
         return tokens["CONSTANT"], table.insert(lexeme, symbol_type)
     if lexeme in tokens and lexeme not in ("IDENTIFIER", "CONSTANT"):
-        return tokens[lexeme], -1
+        return tokens[lexeme], (-1, -1)
     if IDENTIFIER.fullmatch(lexeme):
         return tokens["IDENTIFIER"], table.insert(lexeme, 0)
     return None
@@ -81,9 +81,9 @@ def analyze(source, tokens):
                     token_code, symbol_id = classification
                     pif.append(
                         {
-                            "position": len(pif),
                             "token": token_code,
-                            "st": symbol_id,
+                            "st": symbol_id[0],
+                            "bucket_position": symbol_id[1],
                             "lexeme": lexeme,
                         }
                     )
@@ -103,29 +103,32 @@ def save_tables(result, directory):
     symbols = result["st"]
     write_csv(
         directory / "st.csv",
-        ["Index", "Value / Lexeme", "Type"],
-        [(s["index"], s["value"], s["type"]) for s in symbols],
+        ["Index (bucket, index)", "Value / Lexeme", "Type"],
+        [(str((s["index"], s["bucket_position"])), s["value"], s["type"])
+         for s in symbols],
     )
 
+    token_names = {code: name for name, code in load_tokens(
+        ROOT / "01_lexical_analysis/tokens.txt"
+    ).items()}
     rows = []
     for entry in result["pif"]:
         symbol_id = entry["st"]
         if symbol_id != -1:
-            symbol = symbols[symbol_id]
-            category = "id" if symbol["type"] == "Identifier" else "const"
-            value, kind = symbol["value"], symbol["type"]
+            symbol = next(
+                s for s in symbols
+                if s["index"] == symbol_id
+                and s["bucket_position"] == entry["bucket_position"]
+            )
+            category = token_names[entry["token"]]
+            value = symbol["value"]
         else:
             category = value = entry["lexeme"]
-            if value in ("=", "=="):
-                kind = "Operator"
-            elif IDENTIFIER.fullmatch(value):
-                kind = "Keyword"
-            else:
-                kind = "Separator"
-        rows.append((entry["position"], category, symbol_id, value, kind))
+        reference = str((symbol_id, entry["bucket_position"]))
+        rows.append((reference, category, value))
     write_csv(
         directory / "pif.csv",
-        ["Position", "Token / Category", "ST Index", "Value", "Type"],
+        ["ST Index (bucket, index)", "Token / Category", "Value"],
         rows,
     )
     write_csv(

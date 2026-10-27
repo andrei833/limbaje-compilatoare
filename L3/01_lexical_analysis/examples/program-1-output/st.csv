@@ -1,10 +1,10 @@
-Index,Value / Lexeme,Type
-0,net,Identifier
-1,db,Identifier
-2,api,Identifier
-3,core,Identifier
-4,false,Constant (Boolean)
-5,STOPPED,Constant (State)
-6,node,Identifier
-7,ERROR,Constant (State)
-8,RUNNING,Constant (State)
+"Index (bucket, index)",Value / Lexeme,Type
+"(24, 0)",net,Identifier
+"(97, 0)",db,Identifier
+"(11, 0)",api,Identifier
+"(21, 0)",core,Identifier
+"(18, 0)",false,Constant
+"(38, 0)",STOPPED,Constant
+"(18, 1)",node,Identifier
+"(91, 0)",ERROR,Constant
+"(40, 0)",RUNNING,Constant

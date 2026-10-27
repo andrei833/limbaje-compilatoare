@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -6,8 +5,8 @@
 
 typedef struct Entry {
   char *value;
-  int id;
-  int type; /* 0: identifier, 1: Boolean constant, 2: state constant */
+  int row;
+  int type;
   struct Entry *next;
 } Entry;
 
@@ -17,24 +16,34 @@ typedef struct {
 } SymbolTable;
 
 static unsigned hash(const char *value) {
-  uint32_t h = 2166136261u;
+  unsigned sum = 0;
   while (*value) {
-    h ^= (unsigned char)*value++;
-    h *= 16777619u;
+    sum += (unsigned char)*value;
+    ++value;
   }
-  return h % BUCKETS;
+  return sum % BUCKETS;
 }
 
 SymbolTable *st_create(void) { return calloc(1, sizeof(SymbolTable)); }
 
 int st_lookup(const SymbolTable *table, const char *value) {
-  for (Entry *e = table->buckets[hash(value)]; e; e = e->next)
+  unsigned bucket = hash(value);
+  for (Entry *e = table->buckets[bucket]; e; e = e->next)
     if (strcmp(e->value, value) == 0)
-      return e->id;
+      return (int)bucket;
   return -1;
 }
 
-/* Return the existing/new stable ID, or -1 on allocation failure. */
+int st_position(const SymbolTable *table, const char *value) {
+  int position = 0;
+  for (Entry *e = table->buckets[hash(value)]; e; e = e->next) {
+    if (strcmp(e->value, value) == 0)
+      return position;
+    ++position;
+  }
+  return -1;
+}
+
 int st_insert(SymbolTable *table, const char *value, int type) {
   int existing = st_lookup(table, value);
   if (existing >= 0)
@@ -50,27 +59,38 @@ int st_insert(SymbolTable *table, const char *value, int type) {
   strcpy(e->value, value);
   unsigned bucket = hash(value);
   e->type = type;
-  e->id = table->size++;
-  e->next = table->buckets[bucket];
-  table->buckets[bucket] = e;
-  return e->id;
+  e->row = table->size++;
+  e->next = NULL;
+  Entry **tail = &table->buckets[bucket];
+  while (*tail)
+    tail = &(*tail)->next;
+  *tail = e;
+  return (int)bucket;
 }
 
 int st_size(const SymbolTable *table) { return table->size; }
 
-const char *st_value(const SymbolTable *table, int id) {
+const char *st_value(const SymbolTable *table, int row) {
   for (unsigned b = 0; b < BUCKETS; ++b)
     for (Entry *e = table->buckets[b]; e; e = e->next)
-      if (e->id == id)
+      if (e->row == row)
         return e->value;
   return NULL;
 }
 
-int st_type(const SymbolTable *table, int id) {
+int st_type(const SymbolTable *table, int row) {
   for (unsigned b = 0; b < BUCKETS; ++b)
     for (Entry *e = table->buckets[b]; e; e = e->next)
-      if (e->id == id)
+      if (e->row == row)
         return e->type;
+  return -1;
+}
+
+int st_bucket(const SymbolTable *table, int row) {
+  for (unsigned b = 0; b < BUCKETS; ++b)
+    for (Entry *e = table->buckets[b]; e; e = e->next)
+      if (e->row == row)
+        return (int)b;
   return -1;
 }
 
