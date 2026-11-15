@@ -1,0 +1,227 @@
+=============================================================================
+LAB 6: SYNTACTICAL ANALYSIS OF THE PROCESS-MANAGEMENT MINI DSL
+=============================================================================
+
+1. OBJECTIVES & OVERVIEW
+-----------------------------------------------------------------------------
+The objective is to connect lexical analysis with syntactical analysis for the
+mini DSL defined in Lab 1 and used in Labs 2-5. The language describes processes,
+dependencies, service commands, groups, conditions and iteration over groups.
+
+The implementation uses Python PLY (Lex-Yacc). Lex recognizes source tokens and
+Yacc performs bottom-up LALR(1) parsing. Each reduction records the exact applied
+production, including epsilon productions, in application order.
+
+Requirement 1: Define the mini DSL's context-free grammar (CFG).
+Requirement 2: Parse a PIF using the grammar and output a string of productions.
+Requirement 3: Integrate Lex scanning with Yacc parsing for source input.
+Both lexical errors and syntax errors must be reported.
+
+Deliverables:
+1. This grammar definition document, documentation.txt.
+2. parser.py: integrated scanner, Yacc grammar, reduction trace and PIF adapter.
+   requirements.txt pins PLY; examples/ and test_parser.py support validation.
+
+The generic number/read/write example in the assignment illustrates the report
+format. This implementation applies that format to the existing process DSL.
+Its declarations are process/group statements, its assignment initializes a
+group, its input queries are status/autostart, its output operations are service
+commands, and its loop is for-in. Its expression syntax is equality comparison.
+Arithmetic, read/write keywords and while loops are outside the existing DSL.
+
+
+2. REQUIREMENT 1: GRAMMAR DEFINITION (CFG)
+-----------------------------------------------------------------------------
+G = (N, T, P, S)
+
+S = program
+
+N = {program, statements, statement, process_dec, process_body, group_dec,
+     identifier_list, command, action, conditional, else_clause, loop,
+     condition, state, boolean, identifier}
+
+T = {id, 'process', 'depends_on', 'group', 'start', 'stop', 'enable',
+     'disable', 'if', 'else', 'for', 'in', 'status', 'autostart',
+     'RUNNING', 'STOPPED', 'ERROR', 'true', 'false', '==', '=',
+     '(', ')', '{', '}', '[', ']', ',', ':', ';'}
+
+Notation: ::= means production; quoted text denotes a literal terminal;
+unquoted names denote nonterminals, except id (the identifier token).
+epsilon denotes the empty string and is not a terminal.
+
+P (numbered in the same order as the Yacc implementation):
+
+Rule 1: program ::= statements
+Rule 2: statements ::= statement
+Rule 3: statements ::= statement statements
+Rule 4: statement ::= process_dec
+Rule 5: statement ::= group_dec
+Rule 6: statement ::= command
+Rule 7: statement ::= conditional
+Rule 8: statement ::= loop
+Rule 9: process_dec ::= 'process' identifier process_body ';'
+Rule 10: process_body ::= '{' 'depends_on' ':' identifier_list '}'
+Rule 11: process_body ::= epsilon
+Rule 12: group_dec ::= 'group' identifier '=' '[' identifier_list ']' ';'
+Rule 13: identifier_list ::= identifier
+Rule 14: identifier_list ::= identifier ',' identifier_list
+Rule 15: command ::= action '(' identifier ')' ';'
+Rule 16: action ::= 'start'
+Rule 17: action ::= 'stop'
+Rule 18: action ::= 'enable'
+Rule 19: action ::= 'disable'
+Rule 20: conditional ::= 'if' '(' condition ')' '{' statements '}' else_clause
+Rule 21: else_clause ::= 'else' '{' statements '}'
+Rule 22: else_clause ::= epsilon
+Rule 23: loop ::= 'for' '(' identifier 'in' identifier ')' '{' statements '}'
+Rule 24: condition ::= 'status' '(' identifier ')' '==' state
+Rule 25: condition ::= 'autostart' '(' identifier ')' '==' boolean
+Rule 26: state ::= 'RUNNING'
+Rule 27: state ::= 'STOPPED'
+Rule 28: state ::= 'ERROR'
+Rule 29: boolean ::= 'true'
+Rule 30: boolean ::= 'false'
+Rule 31: identifier ::= id
+
+Lexical definition of id: [A-Za-z][A-Za-z0-9_]*, excluding reserved keywords
+and constants. Recognition is case-sensitive. Constants are RUNNING, STOPPED,
+ERROR, true and false. Whitespace is ignored. Numbers, strings, comments and
+identifiers starting with an underscore are not supported by this DSL.
+
+The grammar corrects the original BNF's proecess_dec spelling and separates
+depends_on and ':' as in the existing scanner. It preserves the language:
+programs, blocks, dependency lists and group lists must be nonempty. Process
+bodies and else clauses are optional. Braces explicitly delimit branches;
+each else belongs to its enclosing conditional. Parentheses delimit queries
+and conditions. '==' is the only relational operator; '=' is reserved for
+group initialization, so no arithmetic precedence declarations are needed.
+
+
+3. REQUIREMENTS 2 & 3: INTEGRATED SCANNER & PARSER
+-----------------------------------------------------------------------------
+3.1 INPUT PART A: GRAMMAR RULES
+
+The grammar input to Yacc is the set of p_* function docstrings in parser.py,
+corresponding exactly to Rules 1-31 above. Yacc builds its LALR(1) parsing table
+from these rules. Run parser.py --grammar to print the implemented rules.
+Changing the language requires editing those Yacc rules and this document;
+an arbitrary external CFG file is not accepted at runtime.
+
+3.2 INPUT PART B: PROGRAM INTERNAL FORM (PIF)
+
+Source Code:
+    process net;
+
+Corresponding PIF Table (integrated scanner):
++--------------------------+------------------+---------+
+| ST Index (bucket, index) | Token / Category | Value   |
++--------------------------+------------------+---------+
+| (-1, -1)                 | process          | process |
+| (0, 0)                   | IDENTIFIER       | net     |
+| (-1, -1)                 | ;                | ;       |
++--------------------------+------------------+---------+
+
+The CSV header matches Labs 3/5:
+"ST Index (bucket, index)",Token / Category,Value
+
+Keywords and punctuation carry (-1, -1). Identifiers and constants carry ST
+references. The integrated scanner interns each distinct identifier/constant
+under (sequential_index, 0) and reuses that reference for repeated occurrences.
+The PIF's Value column contains the lexeme, so no separate ST file is needed
+to parse it. The older scanner's hash bucket references are accepted directly;
+they are opaque references and do not affect syntax.
+
+Both modes feed the same Yacc parser:
+- Source mode: Lex returns tokens to Yacc while recording the PIF and symbols.
+- PIF mode: PIFLexer reads the CSV and returns LexToken objects directly to Yacc.
+
+IDENTIFIER maps to ID. A CONSTANT value maps to one of RUNNING, STOPPED, ERROR,
+TRUE or FALSE, allowing the grammar to distinguish states from booleans.
+Fixed categories map to their corresponding keyword or punctuation terminal.
+PIF rows are validated for category/value consistency and valid ST references.
+Reusing a reference for different values, or a value under different references,
+is rejected. Source line positions are unavailable in the legacy PIF format;
+errors in this mode identify the PIF token and CSV row instead.
+
+3.3 OUTPUT: STRING OF PRODUCTIONS (BOTTOM-UP REDUCTION TRACE)
+
+For the source/PIF above, the exact trace is:
+
+1. [Rule 31] identifier -> id (net)
+2. [Rule 11] process_body -> epsilon
+3. [Rule 9] process_dec -> 'process' identifier process_body ';'
+4. [Rule 4] statement -> process_dec
+5. [Rule 2] statements -> statement
+6. [Rule 1] program -> statements
+String of productions: 31 11 9 4 2 1
+
+Parsing completed successfully with 0 lexical errors and 0 syntax errors!
+
+Step numbers show reduction order; Rule numbers identify the CFG productions.
+Shifts are not productions and are not included. The numeric string contains
+every reduction, including repeated rules. Reversing the reduction order yields
+the rightmost derivation's production order. The augmented Yacc start rule is
+an internal implementation detail and is omitted from this output.
+
+A complete generated report is included as examples/minimal-output.txt.
+
+3.4 LEXICAL AND SYNTAX ERROR REPORTING
+
+Lexical error example:
+    process 9net;
+    Lexical error at line 1, column 9: invalid token '9net'
+
+Illegal character example:
+    process net; @
+    Lexical error at line 1, column 14: illegal character '@'
+
+Syntax error example (missing declaration semicolon):
+    process net
+    start(net);
+    Syntax error at line 2, column 1: unexpected 'start' (START)
+
+Unexpected end of input example:
+    process net
+    Syntax error at EOF: unexpected end of input
+
+The scanner/parser stops at the first detected error and returns exit status 1.
+There is no token-skipping recovery. Partial reductions are discarded, no
+complete production string is printed, and output files are not written for
+a failed parse. A valid parse returns exit status 0. Existing output files from
+an earlier successful run are retained on a later parsing failure.
+
+This is syntactical analysis: it neither executes commands nor checks whether
+processes/groups were declared, names are unique, or dependencies form cycles.
+
+
+4. EXECUTION & VALIDATION
+-----------------------------------------------------------------------------
+Prerequisite: Python 3 and PLY 3.11. From the repository root:
+
+python3 -m venv L6/.venv
+L6/.venv/bin/python -m pip install -r L6/requirements.txt
+
+Integrated source scanning and parsing:
+L6/.venv/bin/python L6/parser.py L6/examples/minimal.txt
+L6/.venv/bin/python L6/parser.py L6/examples/program.txt --output L6/output
+
+Parse the earlier scanner's PIF directly:
+L6/.venv/bin/python L6/parser.py --pif L5/01_lexical_analysis/examples/program-1-output/pif.csv
+
+Parse the integrated scanner's saved PIF:
+L6/.venv/bin/python L6/parser.py --pif L6/output/pif.csv
+
+Print the grammar:
+L6/.venv/bin/python L6/parser.py --grammar
+
+Run the automated checks:
+L6/.venv/bin/python -m unittest discover -s L6 -v
+
+The checks cover an exact minimal reduction trace, all 31 grammar productions,
+Lab 5 examples, source/PIF trace equivalence, symbol reuse, nested control flow,
+invalid lexemes, missing delimiters, wrong constant types, empty constructs,
+EOF errors, malformed PIF rows, conflicting ST references and CLI output files.
+
+PLY reference (Lex/Yacc and custom token sources):
+https://github.com/dabeaz/ply/blob/master/doc/ply.md
+=============================================================================
