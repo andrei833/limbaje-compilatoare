@@ -1,0 +1,10 @@
+"Index (bucket, index)",Value / Lexeme,Type
+"(24, 0)",net,Identifier
+"(97, 0)",db,Identifier
+"(11, 0)",api,Identifier
+"(21, 0)",core,Identifier
+"(18, 0)",false,Constant
+"(38, 0)",STOPPED,Constant
+"(18, 1)",node,Identifier
+"(91, 0)",ERROR,Constant
+"(40, 0)",RUNNING,Constant

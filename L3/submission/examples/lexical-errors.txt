@@ -1,0 +1,3 @@
+process 12abc;
+process _bad;
+start(net) @;

@@ -1,0 +1,49 @@
+Lab 5 documentation
+
+For this lab, I integrated the finite automata from Lab 4 into the scanner.
+I used the process-management programs from Lab 2 and kept the C symbol
+table and CSV output format from Lab 3. The scanner no longer uses regular
+expressions to recognize tokens.
+
+The scanner reads the input from left to right and skips whitespace.
+This includes spaces, tabs (\t), newlines (\n) and carriage returns (\r),
+checked using isspace(). They do not get entries in the PIF or symbol
+table, but still count towards the source index used in error messages.
+It collects each whole word, then checks it using the constant automaton,
+the keyword list and the identifier automaton, in this order. Each automaton
+starts in its initial state and follows one transition for each character.
+A missing transition rejects the word. After the last character, the word
+is accepted only if the current state is final.
+
+The identifier automaton has two states. The first character must be an
+ASCII letter. After that, letters, digits and underscores are allowed.
+For example, net and node2 are valid, while _node and 12abc are invalid.
+The constants are true, false, RUNNING, STOPPED and ERROR. Their automaton
+has a state for each prefix and accepts only complete constants. Constants
+are case-sensitive. There are no numeric or string constants in this DSL.
+
+Constants also match the identifier automaton, so I check them first.
+Keywords are checked before identifiers for the same reason. Whole words
+are checked together: trueValue is an identifier, not true followed by
+Value. RUNN is also an identifier, even though it is not a complete constant.
+Fixed symbols are checked longest first, so == is recognized before =.
+
+The automata can also be converted to regular grammars using the Lab 4
+method. Each transition becomes a production and each final state gets
+an epsilon production. The scanner uses the FA directly; the equivalent
+RG can be displayed with automata.py.
+
+The symbol table still uses 101 hash buckets with linked lists for
+collisions. Identifiers and constants are inserted only once. The PIF
+stores tokens in source order and references symbols using (bucket,
+position in bucket). Fixed tokens use (-1, -1).
+
+The results are saved in st.csv, pif.csv and errors.csv. Errors are also
+printed in the console. If there are no errors, a success message is shown. Lexical errors
+include the invalid text and its zero-based character index. Scanning
+continues after an error. Invalid words such as 12abc are reported as one
+error and are not inserted into the symbol table.
+
+I checked the scanner on both Lab 2 programs, the lexical-error example,
+and tests for token priority, invalid words, ASCII characters, repeated
+symbols and hash collisions. I also compared the CSV results with Lab 3.

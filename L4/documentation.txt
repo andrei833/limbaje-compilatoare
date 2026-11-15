@@ -1,0 +1,198 @@
+================================================================================
+LABORATORY WORK 4: FINITE AUTOMATA AND REGULAR GRAMMARS
+PROCESS-MANAGEMENT LANGUAGE
+================================================================================
+
+1. INTRODUCTION & OBJECTIVES
+--------------------------------------------------------------------------------
+This lab uses the process-management language from Lab 2. We define finite
+automata for identifiers and constants, then convert them into equivalent
+regular grammars.
+
+2. FORMAL DEFINITIONS (REQUIREMENT 1)
+--------------------------------------------------------------------------------
+A finite automaton is M = (Q, Sigma, delta, q0, F):
+- Q: the set of states.
+- Sigma: the set of input characters.
+- delta: the transition function, (state, character) -> next state.
+- q0: the initial state.
+- F: the set of accepting states.
+
+We start in q0 and read one character at a time. A missing transition rejects
+the word. After reading the whole word, we accept only if the current state
+is in F. An accepting state can still have outgoing transitions.
+
+A regular grammar is G = (N, T, P, S):
+- N: the set of nonterminals.
+- T: the set of terminals, which are actual input characters.
+- P: the set of production rules.
+- S: the starting symbol.
+
+A rule replaces a nonterminal with its right-hand side. Epsilon is the empty
+string. A word is generated when only terminal characters remain.
+
+2.1 IDENTIFIERS ([A-Za-z][A-Za-z0-9_]*)
+--------------------------------------------------------------------------------
+An identifier starts with an ASCII letter and continues with zero or more
+letters, digits or underscores. Examples: net, node2, data_tier.
+The empty word, _node and 2node are rejected.
+
+BNF:
+<identifier> ::= <letter> <val_chars>
+<val_chars>  ::= <letter> <val_chars> | <digit> <val_chars>
+               | "_" <val_chars> | epsilon
+<letter>     ::= "a" | "b" | ... | "z" | "A" | "B" | ... | "Z"
+<digit>      ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+
+The dots abbreviate all ASCII letters in the indicated ranges.
+
+Finite Automaton (FA) Definition: M = (Q, Sigma, delta, q0, F)
+- Q (States)         = {q0, q1}
+- Sigma (Alphabet)   = {a-z, A-Z, 0-9, _}
+- q0 (Start State)   = q0
+- F (Final States)   = {q1}
+- delta (Transitions):
+  * delta(q0, letter) = q1
+  * delta(q1, letter) = q1
+  * delta(q1, digit) = q1
+  * delta(q1, '_') = q1
+
+The first letter moves from q0 to q1. Other allowed characters loop in q1.
+There is no transition from q0 for a digit or underscore.
+
+Regular Grammar (RG) Definition: G = (N, T, P, S)
+- N (Nonterminals)   = {q0, q1}
+- T (Terminals)      = {a-z, A-Z, 0-9, _}
+- S (Start Symbol)   = q0
+- P (Production Rules):
+  * q0 -> letter q1
+  * q1 -> letter q1
+  * q1 -> digit q1
+  * q1 -> '_' q1
+  * q1 -> epsilon
+
+Letter and digit stand for separate transitions and productions for each
+allowed character. The code creates all of them individually.
+The repeated q1 lets us produce more characters or finish with epsilon.
+
+Example derivation:
+q0 => a q1 => a2 q1 => a2
+
+2.2 CONSTANTS (true, false, RUNNING, STOPPED, ERROR)
+--------------------------------------------------------------------------------
+The constants are the two boolean values and the three process states.
+They are case-sensitive. The language has no numeric or string constants.
+
+BNF:
+<constant> ::= <boolean> | <state>
+<boolean>  ::= "true" | "false"
+<state>    ::= "RUNNING" | "STOPPED" | "ERROR"
+
+Finite Automaton (FA) Definition: M = (Q, Sigma, delta, q0, F)
+- Q (States):
+  {q0, q_E, q_ER, q_ERR, q_ERRO, q_ERROR, q_R, q_RU, q_RUN, q_RUNN, q_RUNNI, q_RUNNIN, q_RUNNING, q_S, q_ST, q_STO, q_STOP, q_STOPP, q_STOPPE, q_STOPPED, q_f, q_fa, q_fal, q_fals, q_false, q_t, q_tr, q_tru, q_true}
+- Sigma (Alphabet):
+  {'D', 'E', 'G', 'I', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'a', 'e', 'f', 'l', 'r', 's', 't', 'u'}
+- q0 (Start State) = q0
+- F (Final States) = {q_true, q_false, q_RUNNING, q_STOPPED, q_ERROR}
+- delta (Transitions):
+  * delta(q0, 'E') = q_E
+  * delta(q0, 'R') = q_R
+  * delta(q0, 'S') = q_S
+  * delta(q0, 'f') = q_f
+  * delta(q0, 't') = q_t
+  * delta(q_E, 'R') = q_ER
+  * delta(q_ER, 'R') = q_ERR
+  * delta(q_ERR, 'O') = q_ERRO
+  * delta(q_ERRO, 'R') = q_ERROR
+  * delta(q_R, 'U') = q_RU
+  * delta(q_RU, 'N') = q_RUN
+  * delta(q_RUN, 'N') = q_RUNN
+  * delta(q_RUNN, 'I') = q_RUNNI
+  * delta(q_RUNNI, 'N') = q_RUNNIN
+  * delta(q_RUNNIN, 'G') = q_RUNNING
+  * delta(q_S, 'T') = q_ST
+  * delta(q_ST, 'O') = q_STO
+  * delta(q_STO, 'P') = q_STOP
+  * delta(q_STOP, 'P') = q_STOPP
+  * delta(q_STOPP, 'E') = q_STOPPE
+  * delta(q_STOPPE, 'D') = q_STOPPED
+  * delta(q_f, 'a') = q_fa
+  * delta(q_fa, 'l') = q_fal
+  * delta(q_fal, 's') = q_fals
+  * delta(q_fals, 'e') = q_false
+  * delta(q_t, 'r') = q_tr
+  * delta(q_tr, 'u') = q_tru
+  * delta(q_tru, 'e') = q_true
+
+Each nonempty prefix of a constant has its own state. Only states for complete
+constants are accepting. For example, tru stops in q_tru and is rejected;
+true stops in q_true and is accepted. There are no loops in this automaton.
+
+Regular Grammar (RG) Definition: G = (N, T, P, S)
+- N (Nonterminals) = Q of the constant automaton above.
+- T (Terminals) = Sigma of the constant automaton above.
+- S (Start Symbol) = q0
+- P (Production Rules):
+  * q0 -> 'E' q_E
+  * q0 -> 'R' q_R
+  * q0 -> 'S' q_S
+  * q0 -> 'f' q_f
+  * q0 -> 't' q_t
+  * q_E -> 'R' q_ER
+  * q_ER -> 'R' q_ERR
+  * q_ERR -> 'O' q_ERRO
+  * q_ERRO -> 'R' q_ERROR
+  * q_ERROR -> epsilon
+  * q_R -> 'U' q_RU
+  * q_RU -> 'N' q_RUN
+  * q_RUN -> 'N' q_RUNN
+  * q_RUNN -> 'I' q_RUNNI
+  * q_RUNNI -> 'N' q_RUNNIN
+  * q_RUNNIN -> 'G' q_RUNNING
+  * q_RUNNING -> epsilon
+  * q_S -> 'T' q_ST
+  * q_ST -> 'O' q_STO
+  * q_STO -> 'P' q_STOP
+  * q_STOP -> 'P' q_STOPP
+  * q_STOPP -> 'E' q_STOPPE
+  * q_STOPPE -> 'D' q_STOPPED
+  * q_STOPPED -> epsilon
+  * q_f -> 'a' q_fa
+  * q_fa -> 'l' q_fal
+  * q_fal -> 's' q_fals
+  * q_fals -> 'e' q_false
+  * q_false -> epsilon
+  * q_t -> 'r' q_tr
+  * q_tr -> 'u' q_tru
+  * q_tru -> 'e' q_true
+  * q_true -> epsilon
+
+Example derivation:
+q0 => t q_t => tr q_tr => tru q_tru => true q_true => true
+
+2.3 KEYWORDS AND TOKEN PRIORITY
+--------------------------------------------------------------------------------
+Keywords are: process, depends_on, group, start, stop, enable, disable,
+if, else, for, in, status and autostart.
+
+Keywords and constants also match the identifier pattern, but they are
+reserved. We check constants first, then keywords, then identifiers.
+Keywords are checked directly in a set and have no separate automaton.
+
+3. FA TO RG TRANSFORMATION ALGORITHM (REQUIREMENT 2)
+--------------------------------------------------------------------------------
+1. Every FA state becomes a nonterminal: N = Q.
+2. The input alphabet becomes the terminal set: T = Sigma.
+3. The initial state becomes the start symbol: S = q0.
+4. Each transition delta(q, a) = r gives the production q -> 'a' r.
+5. Each accepting state q gets the production q -> epsilon.
+
+Each production follows one transition and produces its character. Epsilon
+allows the derivation to finish at an accepting state. The grammar generates
+exactly the words accepted by the automaton.
+
+In the code, P maps each nonterminal to its rules. The tuple ('a', 'q1')
+represents 'a' followed by q1. The tuple ('', None) represents epsilon.
+
+================================================================================

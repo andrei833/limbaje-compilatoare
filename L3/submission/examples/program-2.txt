@@ -1,0 +1,12 @@
+process net;
+group core = [net];
+
+for (node in core) {
+    if (status(node) == ERROR) {
+        disable(node);
+        stop(node);
+    } else {
+        enable(node);
+        start(node);
+    }
+}

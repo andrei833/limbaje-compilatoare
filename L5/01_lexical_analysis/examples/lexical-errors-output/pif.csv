@@ -1,0 +1,11 @@
+"ST Index (bucket, index)",Token / Category,Value
+"(-1, -1)",process,process
+"(-1, -1)",;,;
+"(-1, -1)",process,process
+"(-1, -1)",;,;
+"(-1, -1)",start,start
+"(-1, -1)",(,(
+"(24, 0)",IDENTIFIER,net
+"(-1, -1)",),)
+"(-1, -1)",;,;
+"(44, 0)",IDENTIFIER,a005

@@ -1,0 +1,32 @@
+process net;
+process db { depends_on: net };
+process api { depends_on: db };
+
+group core = [net, db];
+
+disable(api);
+
+if (autostart(net) == false) {
+    enable(net);
+}
+if (status(net) == STOPPED) {
+    start(net);
+}
+
+for (node in core) {
+    if (status(node) == ERROR) {
+        stop(node);
+    }
+    if (autostart(node) == false) {
+        enable(node);
+    }
+    start(node);
+}
+
+if (status(db) == RUNNING) {
+    enable(api);
+    start(api);
+} else {
+    disable(api);
+    stop(api);
+}
