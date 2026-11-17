@@ -19,7 +19,8 @@ Both lexical errors and syntax errors must be reported.
 
 Deliverables:
 1. This grammar definition document, documentation.txt.
-2. parser.py: integrated scanner, Yacc grammar, reduction trace and PIF adapter.
+2. parser.py: Yacc grammar, reduction trace and command-line program.
+   lexer.py: integrated Lex scanner and PIF reader.
    requirements.txt pins PLY; examples/ and test_parser.py support validation.
 
 The generic number/read/write example in the assignment illustrates the report
@@ -133,7 +134,7 @@ they are opaque references and do not affect syntax.
 
 Both modes feed the same Yacc parser:
 - Source mode: Lex returns tokens to Yacc while recording the PIF and symbols.
-- PIF mode: PIFLexer reads the CSV and returns LexToken objects directly to Yacc.
+- PIF mode: load_pif() reads the CSV; PIFLexer returns its tokens to Yacc.
 
 IDENTIFIER maps to ID. A CONSTANT value maps to one of RUNNING, STOPPED, ERROR,
 TRUE or FALSE, allowing the grammar to distinguish states from booleans.
@@ -198,8 +199,8 @@ processes/groups were declared, names are unique, or dependencies form cycles.
 -----------------------------------------------------------------------------
 Prerequisite: Python 3 and PLY 3.11. From the repository root:
 
-python3 -m venv L6/.venv
-L6/.venv/bin/python -m pip install -r L6/requirements.txt
+uv venv L6/.venv
+uv pip install --python L6/.venv/bin/python -r L6/requirements.txt
 
 Integrated source scanning and parsing:
 L6/.venv/bin/python L6/parser.py L6/examples/minimal.txt

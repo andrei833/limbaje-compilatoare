@@ -3,13 +3,20 @@
 This lab parses the process-management DSL from Labs 1–5 using PLY's Lex
 scanner and LALR(1) Yacc parser. Deliverables are [documentation.txt](documentation.txt)
 (formal numbered CFG, input/output example, design and error reporting) and
-[parser.py](parser.py) (integrated scanner, parser and PIF adapter).
+[parser.py](parser.py) (grammar and parsing) with [lexer.py](lexer.py)
+(scanner and PIF reader).
+
+Like L5, the code uses plain functions: `analyze()` returns a dictionary with
+`pif` and `productions`, and `save_tables()` writes the results. Each grammar
+function contains one production and a `record(rule_number)` call. Start with
+`p_process_dec_9()` to see how a process declaration is recognized. The small
+`PIFLexer` class only supplies Yacc's required `token()` interface for CSV input.
 
 From the repository root:
 
 ```sh
-python3 -m venv L6/.venv
-L6/.venv/bin/python -m pip install -r L6/requirements.txt
+uv venv L6/.venv
+uv pip install --python L6/.venv/bin/python -r L6/requirements.txt
 L6/.venv/bin/python L6/parser.py L6/examples/minimal.txt
 L6/.venv/bin/python L6/parser.py L6/examples/program.txt --output L6/output
 L6/.venv/bin/python L6/parser.py --pif L5/01_lexical_analysis/examples/program-1-output/pif.csv
