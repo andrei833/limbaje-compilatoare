@@ -4,8 +4,9 @@ import ast
 import csv
 import re
 from pathlib import Path
+from types import SimpleNamespace
 
-import ply.lex as lex
+from ply import lex
 
 # Requirement 3 - scanning: define the tokens that PLY Lex supplies to Yacc.
 KEYWORDS = {
@@ -107,8 +108,11 @@ def load_pif(path):
         if reader.fieldnames != PIF_HEADERS:
             raise AnalysisError(f'PIF error: expected CSV columns {PIF_HEADERS!r}')
         for row_number, row in enumerate(reader, 2):
-            reference, category, value = (row.get(key) for key in PIF_HEADERS)
-            if None in (reference, category, value) or None in row:
+            reference = row.get(PIF_HEADERS[0])
+            category = row.get(PIF_HEADERS[1])
+            value = row.get(PIF_HEADERS[2])
+            if (not isinstance(reference, str) or not isinstance(category, str)
+                    or not isinstance(value, str) or None in row):
                 raise AnalysisError(f'PIF error at CSV row {row_number}: malformed row')
             try:
                 ref = ast.literal_eval(reference)
@@ -136,10 +140,14 @@ def load_pif(path):
                     raise AnalysisError(f'PIF error at CSV row {row_number}: inconsistent ST reference')
                 references[ref] = value
                 symbols[value] = ref
-            token = lex.LexToken()
-            token.type, token.value = kind, value
-            token.lineno, token.lexpos = row_number, len(items)
-            token.location = f"PIF token {len(items) + 1} (CSV row {row_number})"
+            # Yacc accepts any token object with type and value attributes.
+            token = SimpleNamespace(
+                type=kind,
+                value=value,
+                lineno=row_number,
+                lexpos=len(items),
+                location=f"PIF token {len(items) + 1} (CSV row {row_number})",
+            )
             items.append(token)
             rows.append([reference, category, value])
     return PIFLexer(rows, items)

@@ -191,11 +191,14 @@ def p_error(token):
     )
 
 
-# Requirement 2 - parsing: build the bottom-up LALR(1) parser with PLY Yacc.
+# Requirement 2 - parsing:  parser with PLY Yacc.
 parser = yacc.yacc(start="program", write_tables=False, debug=False)
 grammar = []
 for rule in parser.productions[1:]:
-    rhs = " ".join(str(TOKEN_TEXT.get(symbol, symbol)) for symbol in rule.prod) or "epsilon"
+    rhs = (
+        " ".join(str(TOKEN_TEXT.get(symbol, symbol)) for symbol in rule.prod)
+        or "epsilon"
+    )
     grammar.append(f"{rule.name} -> {rhs}")
 
 

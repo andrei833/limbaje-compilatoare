@@ -15,7 +15,6 @@ ROOT = Path(__file__).resolve().parent
 class ParserTests(unittest.TestCase):
     def parse(self, **kwargs):
         result = analyze(**kwargs)
-        self.rows = result["pif"]
         return result["productions"]
 
     def write_pif(self, path, rows):
@@ -66,8 +65,9 @@ if (autostart(net) == true) { enable(net); }
         self.assertEqual(applied, set(range(1, 32)))
 
     def test_integrated_scanner_roundtrip_and_symbol_reuse(self):
-        trace = self.parse(source="process net; start(net);")
-        rows = self.rows
+        result = analyze(source="process net; start(net);")
+        trace = result["productions"]
+        rows = result["pif"]
         references = [row[0] for row in rows if row[1] == "IDENTIFIER"]
         self.assertEqual(references, ["(0, 0)", "(0, 0)"])
         with tempfile.TemporaryDirectory() as directory:
